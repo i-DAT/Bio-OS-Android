@@ -1,4 +1,15 @@
-Bio-OS-Android
-==============
+# Bio-OS for Android
 
-Bio-OS Android App
+A heartrate monitor (and other bits) using Android as a data capture device,
+connected to an [IOIO][] board and a Sparkfun [HMRI][] breakout board.
+
+## Dependencies
+
+* Targeted against: Android Gingerbread (2.3.3).
+* Designed for an IOIOv1 board.
+
+## License
+
+
+[IOIO]: https://github.com/ytai/ioio/
+[HMRI]: https://www.sparkfun.com/products/8661
