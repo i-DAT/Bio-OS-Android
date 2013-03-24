@@ -10,7 +10,11 @@ connected to an [IOIO][] board and a Sparkfun [HMRI][] breakout board.
   support the IOIO board.
 * Designed for an IOIOv1 board.
 
+## Hardware
 
+Pin   | Sensor       | Usage
+----- | ------------ | -----------------
+0     | Status LED   | Used for testing. 
 
 ## License
 
