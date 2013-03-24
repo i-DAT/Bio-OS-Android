@@ -12,9 +12,12 @@ connected to an [IOIO][] board and a Sparkfun [HMRI][] breakout board.
 
 ## Hardware
 
-Pin   | Sensor       | Usage
------ | ------------ | -----------------
-0     | Status LED   | Used for testing. 
+Pin   | Sensor           | Usage
+----- | ---------------- | ------------------------------------------------------------------------
+0     | Status LED       | Used for testing.
+42    | GSR              | Glavanic Skin Response, use .getVoltage(); to read.
+43    | Stretch Resistor | Breathing Rate, use .read(); to read.
+45    | Temprature       | Local Skin Temprature, use .getVoltage(); to read, requires conversion.          
 
 ## License
 
