@@ -16,6 +16,8 @@ import android.widget.ToggleButton;
  *
  */
 public class MainActivity extends Activity {
+	/** A reference to the BioSingleton instance. */
+	private BioSingleton bio_;
 	/** The main button */
 	private ToggleButton button_;
 
@@ -26,6 +28,10 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		// this creates the singleton the first time.
+		bio_ = BioSingleton.getBioSingleton();
+		
 		button_ = (ToggleButton)findViewById(R.id.button);
 	}
 	
@@ -38,6 +44,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		bio_.start();
 	}
 	
 	/**
@@ -48,6 +55,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		bio_.stop();
 	}
 
 	/**

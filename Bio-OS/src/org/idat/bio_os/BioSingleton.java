@@ -1,5 +1,7 @@
 package org.idat.bio_os;
 
+import android.util.Log;
+
 /**
  * A singleton instance for accessing the hardware. It manages a single thread
  * which is used to request (and send) data from (to) the IOIO board. 
@@ -20,6 +22,9 @@ public class BioSingleton {
 		USB,
 		BLUETOOTH
 	}
+	
+	/** The IOIO thread. */
+	private IOIOThread ioio_thread_;
 	
 	/**
 	 * Hold on to a firm reference to this class.
@@ -42,14 +47,23 @@ public class BioSingleton {
      * Start the hardware thread.
      */
     public void start() {
-    	
+    	Log.i("BioOS", "Starting the IOIOThread.");
+    	ioio_thread_ = new IOIOThread();
+    	ioio_thread_.start();
     }
     
     /**
      * Stop the hardware thread.
      */
     public void stop() {
+    	Log.i("BioOS", "Stopping the IOIOThread.");
+    	ioio_thread_.abort();
     	
+    	try {
+    		ioio_thread_.join();
+    	} catch (InterruptedException e) {
+    		// couldn't join, I guess.
+    	}
     }
     
     /**

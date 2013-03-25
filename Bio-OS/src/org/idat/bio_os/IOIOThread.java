@@ -1,6 +1,16 @@
 package org.idat.bio_os;
 
+import java.util.Collection;
+
+import android.util.Log;
+
+import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
+import ioio.lib.api.IOIOConnection;
+import ioio.lib.api.IOIOFactory;
+import ioio.lib.api.exception.ConnectionLostException;
+import ioio.lib.spi.IOIOConnectionFactory;
+import ioio.lib.util.IOIOConnectionRegistry;
 
 /**
  * This is the thread which handles IOIO interaction.
@@ -24,6 +34,15 @@ public class IOIOThread extends Thread {
 	private IOIO ioio_;
 	/** The abort flag. */
 	private boolean abort_ = false;
+	/** Hold the device connection. */
+	private IOIOConnection ioioConnection_;
+	
+	static {
+		IOIOConnectionRegistry.addBootstraps(new String[] {
+			"ioio.lib.android.accessory.AccessoryConnectionBootstrap",
+			"ioio.lib.android.bluetooth.BluetoothIOIOConnectionBootstrap"
+		});
+	}
 	
 	/**
 	 * The thread itself.
@@ -31,12 +50,67 @@ public class IOIOThread extends Thread {
 	@Override
 	public void run() {
 		super.run();
+		
+		while(true) {
+			synchronized(this) {
+				if (abort_) {
+					break;
+				}
+				
+				Log.i("BioOS", "Attempting to create the IOIO device.");
+				
+				Collection<IOIOConnectionFactory> connectionFactories = IOIOConnectionRegistry.getConnectionFactories();
+				
+				for (IOIOConnectionFactory factory : connectionFactories) {
+					if (factory.getType().contentEquals("ioio.lib.android.bluetooth.BluetoothIOIOConnection")) {
+						ioioConnection_ = factory.createConnection();
+					}
+				}
+				
+				ioio_ = IOIOFactory.create(ioioConnection_);
+			}
+			
+			try {
+				ioio_.waitForConnect();
+				
+				// do the hardware setup
+				DigitalOutput led = ioio_.openDigitalOutput(IOIO.LED_PIN);
+				
+				// do the hardware loop
+				while (true) {
+					led.write(false);
+					
+					sleep(100);
+				}
+			} catch (ConnectionLostException e) {
+				// do something about a lost connection
+				Log.e("BioOS", "Connection lost", e);
+			} catch (Exception e) {
+				Log.e("BioOS", "Unexcepted exception caught", e);
+				ioio_.disconnect();
+				break;
+			} finally {
+				if (ioio_ != null) {
+					try {
+						Log.i("BioOS", "Disconnecting the hardware.");
+						ioio_.waitForDisconnect();
+					} catch (InterruptedException e) {
+						// i guess the disconnect was interrupted?
+					}
+				}
+				
+				synchronized(this) {
+					ioio_ = null;
+				}
+			}
+		}
 	}
 	
 	/**
 	 * Abort the connection.
 	 */
 	synchronized public void abort() {
+		Log.i("BioOS", "Aborting the IOIOThread.");
 		abort_ = true;
 		
 		if (ioio_ != null) {
