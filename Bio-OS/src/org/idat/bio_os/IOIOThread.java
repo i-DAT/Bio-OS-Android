@@ -36,12 +36,38 @@ public class IOIOThread extends Thread {
 	private boolean abort_ = false;
 	/** Hold the device connection. */
 	private IOIOConnection ioioConnection_;
+	/** The Status LED. */
+	public DigitalOutput led_;
 	
 	static {
 		IOIOConnectionRegistry.addBootstraps(new String[] {
 			"ioio.lib.android.accessory.AccessoryConnectionBootstrap",
 			"ioio.lib.android.bluetooth.BluetoothIOIOConnectionBootstrap"
 		});
+	}
+	
+	/**
+	 * Setup
+	 * 
+	 * Use this to setup the pins.
+	 * 
+	 * @throws ConnectionLostException
+	 * 			If the IOIO is disconnected or lost.
+	 */
+	public void setup(IOIO ioio) throws ConnectionLostException {
+		led_ = ioio.openDigitalOutput(IOIO.LED_PIN);
+	}
+	
+	/**
+	 * Loop
+	 * 
+	 * Use this to interact continuously.
+	 * 
+	 * @throws ConnectionLostException
+	 * 			If the IOIO is disconnected or lost.
+	 */
+	public void loop() throws ConnectionLostException {
+		led_.write(false);
 	}
 	
 	/**
@@ -73,13 +99,12 @@ public class IOIOThread extends Thread {
 			try {
 				ioio_.waitForConnect();
 				
-				// do the hardware setup
-				DigitalOutput led = ioio_.openDigitalOutput(IOIO.LED_PIN);
+				// do the setup
+				setup(ioio_);
 				
 				// do the hardware loop
-				while (true) {
-					led.write(false);
-					
+				while (!abort_) {
+					loop();
 					sleep(100);
 				}
 			} catch (ConnectionLostException e) {
