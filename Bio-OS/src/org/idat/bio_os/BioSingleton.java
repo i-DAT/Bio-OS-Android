@@ -55,7 +55,13 @@ public class BioSingleton {
      * @return true if connected, false if not.
      */
     public boolean isConnected() {
-    	return false;
+    	boolean status;
+    	
+    	synchronized(this) {
+    		status = ioio_thread_.is_connected;
+    	}
+    	
+    	return status;
     }
     
     /**
@@ -63,6 +69,28 @@ public class BioSingleton {
      */
     public IOIOConnectionType getConnectionType() {
 		return IOIOConnectionType.NONE;
+    }
+    
+    /**
+     * Get the LED status.
+     */
+    public boolean getLedStatus() {
+    	boolean status;
+    	
+    	synchronized(this) {
+    		status = ioio_thread_.led_on;
+    	}
+    	
+    	return status;
+    }
+    
+    /**
+     * Set the LED status.
+     */
+    public void setLedOn(boolean status) {
+    	synchronized(this) {
+    		ioio_thread_.led_on = status;
+    	}
     }
     
     /**

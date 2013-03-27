@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 /**
@@ -25,6 +26,7 @@ public class MainActivity extends Activity {
 	private ToggleButton button_;
 	/** Hardware update timer. */
 	private Timer update_timer_;
+	private boolean previous_connection_state = false;
 
 	/**
 	 * Called when the activity is first created.
@@ -58,7 +60,7 @@ public class MainActivity extends Activity {
 			public void run() {
 				timer_invocation();
 			}
-		}, 0, 1000);
+		}, 0, 100);
 	}
 	
 	/**
@@ -71,10 +73,24 @@ public class MainActivity extends Activity {
 	private Runnable timer_tick = new Runnable() {
 		public void run() {
 			// check for and notify about connection changes
+			boolean connection_state = bio_.isConnected();
+			
+			if (previous_connection_state != connection_state) {
+				// toast
+				if (connection_state) {
+					Toast.makeText(getApplicationContext(), "IOIO Connected", Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(getApplicationContext(), "IOIO Disconnected", Toast.LENGTH_LONG).show();
+				}
+				
+				// mark as the last
+				previous_connection_state = connection_state;
+			}
 			
 			// read data and update fields
 			
 			// send commands
+			bio_.setLedOn(button_.isChecked());
 		}
 	};
 	

@@ -37,7 +37,15 @@ public class IOIOThread extends Thread {
 	/** Hold the device connection. */
 	private IOIOConnection ioioConnection_;
 	/** The Status LED. */
-	public DigitalOutput led_;
+	private DigitalOutput led_;
+	
+	/*
+	 * These below are configurable outside of the thread.
+	 * You should talk to BioSingleton about this though.
+	 * He's a bit protective like that.
+	 */
+	public boolean is_connected = false;
+	public boolean led_on = true;
 	
 	static {
 		IOIOConnectionRegistry.addBootstraps(new String[] {
@@ -55,6 +63,10 @@ public class IOIOThread extends Thread {
 	 * 			If the IOIO is disconnected or lost.
 	 */
 	public void setup(IOIO ioio) throws ConnectionLostException {
+		synchronized(this) {
+			is_connected = true;
+		}
+		
 		led_ = ioio.openDigitalOutput(IOIO.LED_PIN);
 	}
 	
@@ -67,7 +79,8 @@ public class IOIOThread extends Thread {
 	 * 			If the IOIO is disconnected or lost.
 	 */
 	public void loop() throws ConnectionLostException {
-		led_.write(false);
+		// the LED goes high when low, so do the opposite of the variable.
+		led_.write(!led_on);
 	}
 	
 	/**
@@ -119,6 +132,11 @@ public class IOIOThread extends Thread {
 					try {
 						Log.i("BioOS", "Disconnecting the hardware.");
 						ioio_.waitForDisconnect();
+						
+						synchronized(this) {
+							is_connected = false;
+						}
+						
 					} catch (InterruptedException e) {
 						// i guess the disconnect was interrupted?
 					}
@@ -140,6 +158,10 @@ public class IOIOThread extends Thread {
 		
 		if (ioio_ != null) {
 			ioio_.disconnect();
+			
+			synchronized(this) {
+				is_connected = false;
+			}
 		}
 	}
 }
