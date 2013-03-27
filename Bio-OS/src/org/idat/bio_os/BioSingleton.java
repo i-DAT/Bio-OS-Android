@@ -25,23 +25,6 @@ public class BioSingleton {
 	
 	/** The IOIO thread. */
 	private IOIOThread ioio_thread_;
-	
-	/**
-	 * Hold on to a firm reference to this class.
-	 *
-	 */
-	private static class BioSingletonHolder {
-        public static BioSingleton bio = new BioSingleton();
-    }
-
-	/**
-	 * Return the BioSingleton instance.
-	 * 
-	 * @return The current BioSingleton instance.
-	 */
-    public static BioSingleton getBioSingleton() {
-        return BioSingletonHolder.bio;
-    }
     
     /**
      * Start the hardware thread.
@@ -80,5 +63,22 @@ public class BioSingleton {
      */
     public IOIOConnectionType getConnectionType() {
 		return IOIOConnectionType.NONE;
+    }
+    
+    /**
+	 * Hold on to a firm reference to this class.
+	 *
+	 */
+	private static class BioSingletonHolder {
+        public static BioSingleton bio = new BioSingleton();
+    }
+
+	/**
+	 * Return the BioSingleton instance.
+	 * 
+	 * @return The current BioSingleton instance.
+	 */
+    public static BioSingleton getBioSingleton() {
+        return BioSingletonHolder.bio;
     }
 }
