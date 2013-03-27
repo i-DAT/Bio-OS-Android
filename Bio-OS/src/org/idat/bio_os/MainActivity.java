@@ -1,5 +1,8 @@
 package org.idat.bio_os;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -20,6 +23,8 @@ public class MainActivity extends Activity {
 	private BioSingleton bio_;
 	/** The main button */
 	private ToggleButton button_;
+	/** Hardware update timer. */
+	private Timer update_timer_;
 
 	/**
 	 * Called when the activity is first created.
@@ -45,7 +50,33 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		bio_.start();
+		
+		// start the hardware update loop
+		update_timer_ = new Timer();
+		update_timer_.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				timer_invocation();
+			}
+		}, 0, 1000);
 	}
+	
+	/**
+	 * Hardware Update Timer Loop
+	 * 
+	 * This pools the BioSingleton instance to check for hardware updates.
+	 * Once this is invoked, all of the fields will be updated and Toasts will
+	 * be sent for hardware connections/disconnections.
+	 */
+	private Runnable timer_tick = new Runnable() {
+		public void run() {
+			// check for and notify about connection changes
+			
+			// read data and update fields
+			
+			// send commands
+		}
+	};
 	
 	/**
 	 * Called when the application is paused.
@@ -55,6 +86,11 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		
+		// stop the hardware loop
+		update_timer_.cancel();
+		
+		// and stop the hardware thread
 		bio_.stop();
 	}
 
@@ -86,5 +122,14 @@ public class MainActivity extends Activity {
 		
 		return false;
 	}
-
+	
+	/**
+	 * Method Invoked by Timer
+	 * 
+	 * This just calls the method below. This is so that the current activity
+	 * can be referred to.
+	 */
+	private void timer_invocation() {
+		this.runOnUiThread(timer_tick);
+	}
 }
