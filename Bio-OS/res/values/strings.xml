@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- General -->
     <string name="app_name">Bio-OS</string>
     <string name="action_about">About</string>
-    <string name="hello_world">Hello world!</string>
+    
+    <!-- Main Activity -->
+    <string name="DefaultValue">0</string>
+    <string name="HeartRateLabel">Heart Rate:</string>
+    <string name="HeartRateUnit">bpm</string>
+    
+    <!-- About Activity -->
 
 </resources>
