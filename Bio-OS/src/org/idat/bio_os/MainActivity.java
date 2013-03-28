@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 /**
  * This is the main activity.
@@ -22,10 +21,9 @@ import android.widget.ToggleButton;
 public class MainActivity extends Activity {
 	/** A reference to the BioSingleton instance. */
 	private BioSingleton bio_;
-	/** The main button */
-	private ToggleButton button_;
 	/** Hardware update timer. */
 	private Timer update_timer_;
+	/** Store the last connection state for comparison. */
 	private boolean previous_connection_state = false;
 
 	/**
@@ -38,8 +36,6 @@ public class MainActivity extends Activity {
 		
 		// this creates the singleton the first time.
 		bio_ = BioSingleton.getBioSingleton();
-		
-		button_ = (ToggleButton)findViewById(R.id.button);
 	}
 	
 	/**
@@ -90,7 +86,6 @@ public class MainActivity extends Activity {
 			// read data and update fields
 			
 			// send commands
-			bio_.setLedOn(button_.isChecked());
 		}
 	};
 	
@@ -102,7 +97,6 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		
 		// stop the hardware loop
 		update_timer_.cancel();
 		
