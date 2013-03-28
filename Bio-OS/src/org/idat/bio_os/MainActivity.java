@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -127,10 +128,12 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			// show the about activity
+			Intent intent = new Intent(this, AboutActivity.class);
+			this.startActivity(intent);
 			return true;
+		default:
+			return super.onOptionsItemSelected(item);
 		}
-		
-		return false;
 	}
 	
 	/**
