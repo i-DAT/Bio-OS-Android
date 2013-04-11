@@ -76,7 +76,7 @@ public class IOIOThread extends Thread {
 		led_ = ioio.openDigitalOutput(IOIO.LED_PIN);
 		
 		Log.i("BioOS", "Opening HMRI");
-		hmri_ = ioio.openTwiMaster(1, TwiMaster.Rate.RATE_100KHz, false);
+		hmri_ = ioio.openTwiMaster(0, TwiMaster.Rate.RATE_100KHz, false);
 	}
 	
 	/**
