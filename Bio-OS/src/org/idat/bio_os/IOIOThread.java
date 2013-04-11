@@ -54,7 +54,7 @@ public class IOIOThread extends Thread {
 	 * He's a bit protective like that.
 	 */
 	public boolean is_connected = false;
-	public boolean led_on = true;
+	public boolean led_on = false;
 	public int heart_rate = 0;
 	public float temperature = 0;
 	public float breathing_rate = 0;
