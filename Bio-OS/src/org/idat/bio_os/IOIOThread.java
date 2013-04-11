@@ -8,6 +8,7 @@ import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.IOIOConnection;
 import ioio.lib.api.IOIOFactory;
+import ioio.lib.api.TwiMaster;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.spi.IOIOConnectionFactory;
 import ioio.lib.util.IOIOConnectionRegistry;
@@ -38,6 +39,10 @@ public class IOIOThread extends Thread {
 	private IOIOConnection ioioConnection_;
 	/** The Status LED. */
 	private DigitalOutput led_;
+	/** HMRI Board */
+	private TwiMaster hmri_;
+	private byte hmri_address_ = 127;
+	private int hmri_entries_ = 0;
 	
 	/*
 	 * These below are configurable outside of the thread.
@@ -46,6 +51,7 @@ public class IOIOThread extends Thread {
 	 */
 	public boolean is_connected = false;
 	public boolean led_on = true;
+	public int heart_rate = 0;
 	
 	static {
 		IOIOConnectionRegistry.addBootstraps(new String[] {
@@ -68,6 +74,9 @@ public class IOIOThread extends Thread {
 		}
 		
 		led_ = ioio.openDigitalOutput(IOIO.LED_PIN);
+		
+		Log.i("BioOS", "Opening HMRI");
+		hmri_ = ioio.openTwiMaster(1, TwiMaster.Rate.RATE_100KHz, false);
 	}
 	
 	/**
@@ -81,6 +90,31 @@ public class IOIOThread extends Thread {
 	public void loop() throws ConnectionLostException {
 		// the LED goes high when low, so do the opposite of the variable.
 		led_.write(!led_on);
+		
+		byte[] request = new byte[] { 'G', (byte)hmri_entries_ }; //{ 0x47, 0x20 };
+		byte[] response = new byte[34]; // status, count, hr1..32
+		
+		try {
+			hmri_.writeRead(hmri_address_, false, request, request.length, response, response.length);
+			
+			/*
+			String data = "";
+			for (int i = 0; i < (hmri_entries_ + 2); i++) {
+				data += " " +  (int)response[i];
+			}
+			Log.i("BioOS", "HMRI (" + hmri_entries_ + "): " + data);
+			*/
+			
+			this.heart_rate = response[2];
+			
+			if (++hmri_entries_ > 30)
+				hmri_entries_ = 0;
+			
+			sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
