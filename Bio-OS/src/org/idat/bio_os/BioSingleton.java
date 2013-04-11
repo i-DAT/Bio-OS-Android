@@ -94,6 +94,19 @@ public class BioSingleton {
     }
     
     /**
+     * Get the Heart Rate Value.
+     */
+    public int getHeartRate() {
+    	int heart_rate = 0;
+    	
+    	synchronized(this) {
+    		heart_rate = ioio_thread_.heart_rate;
+    	}
+    	
+    	return heart_rate;
+    }
+    
+    /**
 	 * Hold on to a firm reference to this class.
 	 *
 	 */

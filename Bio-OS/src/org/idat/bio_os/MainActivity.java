@@ -6,8 +6,10 @@ import java.util.TimerTask;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -85,6 +87,8 @@ public class MainActivity extends Activity {
 			}
 			
 			// read data and update fields
+			TextView heartRateValue = (TextView)findViewById(R.id.HeartRateValue);
+			heartRateValue.setText("" + bio_.getHeartRate());
 			
 			// send commands
 		}
