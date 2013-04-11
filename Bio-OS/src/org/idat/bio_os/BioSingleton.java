@@ -107,6 +107,32 @@ public class BioSingleton {
     }
     
     /**
+     * Get the temperature reading.
+     */
+    public float getTemperature() {
+    	float result = 0.0f;
+    	
+    	synchronized(this) {
+    		result = ioio_thread_.temperature;
+    	}
+    	
+    	return result;
+    }
+    
+    /**
+     * Get the breathing rate reading.
+     */
+    public float getBreathingRate() {
+    	float result = 0.0f;
+    	
+    	synchronized(this) {
+    		result = ioio_thread_.breathing_rate;
+    	}
+    	
+    	return result;
+    }
+    
+    /**
 	 * Hold on to a firm reference to this class.
 	 *
 	 */

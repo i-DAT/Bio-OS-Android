@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import android.util.Log;
 
+import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.IOIOConnection;
@@ -43,6 +44,9 @@ public class IOIOThread extends Thread {
 	private TwiMaster hmri_;
 	private byte hmri_address_ = 127;
 	private int hmri_entries_ = 0;
+	/** Remaining Sensors */
+	private AnalogInput temperature_;
+	private AnalogInput breathing_;
 	
 	/*
 	 * These below are configurable outside of the thread.
@@ -52,6 +56,8 @@ public class IOIOThread extends Thread {
 	public boolean is_connected = false;
 	public boolean led_on = true;
 	public int heart_rate = 0;
+	public float temperature = 0;
+	public float breathing_rate = 0;
 	
 	static {
 		IOIOConnectionRegistry.addBootstraps(new String[] {
@@ -75,6 +81,9 @@ public class IOIOThread extends Thread {
 		
 		led_ = ioio.openDigitalOutput(IOIO.LED_PIN);
 		
+		temperature_ = ioio.openAnalogInput(45);
+		breathing_ = ioio.openAnalogInput(43);
+		
 		Log.i("BioOS", "Opening HMRI");
 		hmri_ = ioio.openTwiMaster(0, TwiMaster.Rate.RATE_100KHz, false);
 	}
@@ -91,6 +100,20 @@ public class IOIOThread extends Thread {
 		// the LED goes high when low, so do the opposite of the variable.
 		led_.write(!led_on);
 		
+		// first the other sensors
+		
+		try {
+			float raw_temp = temperature_.getVoltage();
+			raw_temp = (raw_temp - 0.5f) * 100.f;
+			temperature = Math.round(raw_temp * 10) / 10.0f;
+			
+			breathing_rate = breathing_.getVoltage();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		// and then handle the HMRI
 		byte[] request = new byte[] { 'G', (byte)hmri_entries_ }; //{ 0x47, 0x20 };
 		byte[] response = new byte[34]; // status, count, hr1..32
 		
