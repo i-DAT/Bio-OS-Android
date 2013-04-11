@@ -13,6 +13,8 @@
     <string name="TemperatureUnit">ºC</string>
     <string name="BreathingRateLabel">Breathing Rate:</string>
     <string name="BreathingRateUnit"></string>
+    <string name="LatLongLabel">Latitude/Longitude:</string>
+    <string name="LatLongUnit"></string>
 
     <!-- About Activity -->
     <string name="title_activity_about">About</string>
