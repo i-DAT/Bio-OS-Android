@@ -5,7 +5,12 @@ import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -20,13 +25,17 @@ import android.widget.Toast;
  * @author Nick Charlton <hello@nickcharlton.net>
  *
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements LocationListener {
 	/** A reference to the BioSingleton instance. */
 	private BioSingleton bio_;
 	/** Hardware update timer. */
 	private Timer update_timer_;
 	/** Store the last connection state for comparison. */
 	private boolean previous_connection_state = false;
+	/** Handle Location requests. */
+	private LocationManager locMgr;
+	/** Hold on to the best location type. */
+	private String bestLocationType;
 
 	/**
 	 * Called when the activity is first created.
@@ -38,6 +47,14 @@ public class MainActivity extends Activity {
 		
 		// this creates the singleton the first time.
 		bio_ = BioSingleton.getBioSingleton();
+		
+		// start requesting locations, using the last best
+		locMgr = (LocationManager)getSystemService(LOCATION_SERVICE);
+		
+		Criteria criteria = new Criteria();
+		bestLocationType = locMgr.getBestProvider(criteria, true);
+		Location currentLocation = locMgr.getLastKnownLocation(bestLocationType);
+		updateLocationView(currentLocation);
 	}
 	
 	/**
@@ -50,6 +67,9 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		bio_.start();
+		
+		// update the location
+		locMgr.requestLocationUpdates(bestLocationType, 15000, 1, this);
 		
 		// start the hardware update loop
 		update_timer_ = new Timer();
@@ -112,6 +132,17 @@ public class MainActivity extends Activity {
 		
 		// and stop the hardware thread
 		bio_.stop();
+		
+		// then stop the location updates
+		locMgr.removeUpdates(this);
+	}
+	
+	/**
+	 * Update the location view on request.
+	 */
+	private void updateLocationView(Location location) {
+		TextView latLongValue = (TextView)findViewById(R.id.LatLongValue);
+		latLongValue.setText(location.getLatitude() + ", " + location.getLongitude());
 	}
 
 	/**
@@ -153,5 +184,25 @@ public class MainActivity extends Activity {
 	 */
 	private void timer_invocation() {
 		this.runOnUiThread(timer_tick);
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		updateLocationView(location);
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		Log.i("BioOS", "Location Provider (" + provider + ") Disabled");
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		Log.i("BioOS", "Location Provider (" + provider + ") Enabled");
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		Log.i("BioOS", "Location Status Changed");
 	}
 }
