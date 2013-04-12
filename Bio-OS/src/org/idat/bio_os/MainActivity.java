@@ -2,6 +2,11 @@ package org.idat.bio_os;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,6 +15,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +42,13 @@ public class MainActivity extends Activity implements LocationListener {
 	private LocationManager locMgr;
 	/** Hold on to the best location type. */
 	private String bestLocationType;
+	/** The current thread, used to spin off others. */
+	private Handler guiThread;
+	/** The thread that deals with network access. */
+	private ExecutorService transThread;
+	/** The task used to submit network data. */
+	private Runnable updateTask;
+	private Future transPending;
 
 	/**
 	 * Called when the activity is first created.
@@ -55,6 +68,9 @@ public class MainActivity extends Activity implements LocationListener {
 		bestLocationType = locMgr.getBestProvider(criteria, true);
 		Location currentLocation = locMgr.getLastKnownLocation(bestLocationType);
 		updateLocationView(currentLocation);
+		
+		// setup the web service handling
+		configureWebServiceThreading();
 	}
 	
 	/**
@@ -143,6 +159,33 @@ public class MainActivity extends Activity implements LocationListener {
 	private void updateLocationView(Location location) {
 		TextView latLongValue = (TextView)findViewById(R.id.LatLongValue);
 		latLongValue.setText(location.getLatitude() + ", " + location.getLongitude());
+	}
+	
+	/**
+	 * Sets up the web service interaction.
+	 */
+	private void configureWebServiceThreading() {
+		guiThread = new Handler();
+		transThread = Executors.newSingleThreadExecutor();
+		
+		// the task that is run to update the web service
+		updateTask = new Runnable() {
+			public void run() {
+				// prepare
+				
+				// run asynchronously
+				try {
+					WebServiceTask task = new WebServiceTask(
+							MainActivity.this
+							
+							);
+					
+					transPending = transThread.submit(updateTask);
+				} catch (RejectedExecutionException e) {
+					Log.e("BioOS", "Unable to even attempt submitting data");
+				}
+			}
+		};
 	}
 
 	/**
