@@ -22,6 +22,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bugsense.trace.BugSenseHandler;
+
 /**
  * This is the main activity.
  * 
@@ -56,6 +58,7 @@ public class MainActivity extends Activity implements LocationListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		BugSenseHandler.initAndStartSession(MainActivity.this, "28de3b9b");
 		setContentView(R.layout.activity_main);
 		
 		// this creates the singleton the first time.
